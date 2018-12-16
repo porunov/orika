@@ -747,7 +747,7 @@ public class SourceCodeContext {
             source.setConverter(converter);
             
             if (shouldCaptureFieldContext) {
-                beginCaptureFieldContext(out, fieldMap, source, destination);
+                beginCaptureFieldContext(out, fieldMap, source);
             }
             StringBuilder filterClosing = new StringBuilder();
             VariableRef[] filteredProperties = applyFilters(source, destination, out, filterClosing);
@@ -775,10 +775,10 @@ public class SourceCodeContext {
         return out.toString();
     }
     
-    private void beginCaptureFieldContext(StringBuilder out, FieldMap fieldMap, VariableRef source, VariableRef dest) {
-        out.append(format("mappingContext.beginMappingField(\"%s\", %s, %s, \"%s\", %s, %s);\n" + "try{\n",
+    private void beginCaptureFieldContext(StringBuilder out, FieldMap fieldMap, VariableRef source) {
+        out.append(format("mappingContext.beginMappingField(\"%s\", %s, %s, \"%s\", %s, null);\n" + "try{\n",
                 escapeQuotes(fieldMap.getSource().getExpression()), usedType(fieldMap.getAType()), source.asWrapper(),
-                escapeQuotes(fieldMap.getDestination().getExpression()), usedType(fieldMap.getBType()), dest.asWrapper()));
+                escapeQuotes(fieldMap.getDestination().getExpression()), usedType(fieldMap.getBType())));
     }
     
     private void endCaptureFieldContext(StringBuilder out) {
@@ -798,9 +798,9 @@ public class SourceCodeContext {
         if (filter != null) {
             if (destinationProperty.isNestedProperty()) {
                 out.append("if (");
-                out.append(format("(%s && %s.shouldMap(%s, \"%s\", %s, %s, \"%s\", %s, mappingContext))", destinationProperty.pathNotNull(),
+                out.append(format("(%s && %s.shouldMap(%s, \"%s\", %s, %s, \"%s\", null, mappingContext))", destinationProperty.pathNotNull(),
                     usedFilter(filter), usedType(sourceProperty.type()), varPath(sourceProperty), sourceProperty.asWrapper(),
-                    usedType(destinationProperty.type()), varPath(destinationProperty), destinationProperty.asWrapper()));
+                    usedType(destinationProperty.type()), varPath(destinationProperty)));
 
                 out.append(" || ");
 
@@ -810,9 +810,9 @@ public class SourceCodeContext {
 
                 out.append(") {");
             } else {
-                out.append(format("if (%s.shouldMap(%s, \"%s\", %s, %s, \"%s\", %s, mappingContext)) {", usedFilter(filter),
+                out.append(format("if (%s.shouldMap(%s, \"%s\", %s, %s, \"%s\", null, mappingContext)) {", usedFilter(filter),
                     usedType(sourceProperty.type()), varPath(sourceProperty), sourceProperty.asWrapper(),
-                    usedType(destinationProperty.type()), varPath(destinationProperty), destinationProperty.asWrapper()));
+                    usedType(destinationProperty.type()), varPath(destinationProperty)));
             }
 
             sourceProperty = getSourceFilter(sourceProperty, destinationProperty, filter);
